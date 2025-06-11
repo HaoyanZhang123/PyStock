@@ -1,0 +1,555 @@
+前提条件检查
+在开始之前，确保以下内容已准备好（基于你之前的项目初始化）：
+
+Python 和虚拟环境：
+确保虚拟环境（venv）已正确创建并可激活：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+cd ~/projects/your_project
+source venv/Scripts/activate  # Windows 使用 Scripts
+如果激活失败，参考之前的回答重新创建虚拟环境。
+验证依赖是否已安装：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+pip show tushare pandas numpy matplotlib
+如果缺少，重新安装：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+pip install tushare pandas numpy matplotlib
+TuShare 配置：
+确保 config.py 已配置 TuShare Token：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+# config.py
+TUSHARE_TOKEN = "your_tushare_token"
+如果没有 Token，登录 TuShare Pro 获取。
+项目目录：
+确保目录结构包含：
+text
+
+Collapse
+
+Wrap
+
+Copy
+your_project/
+├── data/
+├── scripts/
+├── config.py
+├── requirements.txt
+└── README.md
+如果缺少 data/daily 子目录，稍后会创建。
+网络连接：
+确保电脑联网，TuShare API 需要在线访问。
+如果访问受限，可能需要 VPN（TuShare 服务器在国内）。
+VS Code 和 Git Bash：已安装，确认可用。
+额外依赖：
+本步骤需要 tushare, pandas, 和 os（标准库，无需额外安装）。已在上一步骤安装。
+详细步骤
+1. 获取股票列表并保存
+目标：使用 TuShare 的 pro.stock_basic 接口获取 A 股列表，保存到 data/stock_list.csv。
+
+步骤：
+
+创建 daily 子目录：
+在 Git Bash 中，进入项目目录：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+cd ~/projects/your_project
+创建 data/daily 目录用于存储日线数据：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+mkdir -p data/daily
+创建获取股票列表脚本：
+在 VS Code 中，右键 scripts 文件夹，点击“新建文件”，命名为 fetch_stock_list.py。
+添加以下代码：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+# scripts/fetch_stock_list.py
+import tushare as ts
+import pandas as pd
+from config import TUSHARE_TOKEN
+
+# 初始化 TuShare
+ts.set_token(TUSHARE_TOKEN)
+pro = ts.pro_api()
+
+# 获取 A 股列表
+stock_list = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry')
+stock_list.to_csv('data/stock_list.csv', index=False)
+print("股票列表已保存至 data/stock_list.csv")
+说明：
+exchange=''：获取所有交易所的股票。
+list_status='L'：只获取上市状态的股票。
+fields：指定返回字段（股票代码、简称、名称、地区、行业）。
+运行脚本：
+确保虚拟环境已激活：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+source venv/Scripts/activate
+运行脚本：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+python scripts/fetch_stock_list.py
+或者在 VS Code 中，打开 fetch_stock_list.py，点击右上角“运行”按钮（或按 Ctrl+F5）。
+验证结果：
+检查 data/stock_list.csv 是否生成：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+ls data
+输出应包含 stock_list.csv。
+在 VS Code 中打开 data/stock_list.csv，确认包含 ts_code, symbol, name, area, industry 列，数据类似：
+text
+
+Collapse
+
+Wrap
+
+Copy
+ts_code,symbol,name,area,industry
+000001.SZ,000001,平安银行,广东,银行
+...
+错误处理：
+如果报错 ModuleNotFoundError，确认虚拟环境已激活且安装了 tushare 和 pandas。
+如果 Token 无效，检查 config.py 中的 Token 是否正确。
+如果网络错误，尝试使用 VPN 或检查网络。
+2. 批量下载日线数据
+目标：遍历股票列表，获取每只股票的日线数据，保存到 data/daily/{ts_code}.csv。
+
+步骤：
+
+创建批量下载脚本：
+在 VS Code 中，右键 scripts 文件夹，创建新文件 fetch_daily_data.py。
+添加以下代码：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+# scripts/fetch_daily_data.py
+import tushare as ts
+import pandas as pd
+import os
+from config import TUSHARE_TOKEN
+
+# 初始化 TuShare
+ts.set_token(TUSHARE_TOKEN)
+pro = ts.pro_api()
+
+# 读取股票列表
+stock_list = pd.read_csv('data/stock_list.csv')
+
+# 批量下载日线数据
+for ts_code in stock_list['ts_code']:
+    file_path = f'data/daily/{ts_code}.csv'
+    if not os.path.exists(file_path):
+        print(f"下载 {ts_code} 的日线数据...")
+        df = pro.daily(ts_code=ts_code, start_date='20200101', end_date='20250601')
+        df.to_csv(file_path, index=False)
+        print(f"{ts_code} 数据已保存至 {file_path}")
+    else:
+        print(f"{ts_code} 数据已存在，跳过")
+说明：
+读取 stock_list.csv 获取股票代码。
+检查 file_path 是否存在，避免重复下载。
+start_date 和 end_date 设为 20200101 至 20250601（你指定的范围）。
+注意：TuShare 有积分限制，免费账户每天调用 pro.daily 次数有限。批量下载可能需要分批运行或升级账户。
+运行脚本：
+确保虚拟环境已激活：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+source venv/Scripts/activate
+运行：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+python scripts/fetch_daily_data.py
+脚本会逐个下载数据，输出类似：
+text
+
+Collapse
+
+Wrap
+
+Copy
+下载 000001.SZ 的日线数据...
+000001.SZ 数据已保存至 data/daily/000001.SZ.csv
+...
+验证结果：
+检查 data/daily 目录：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+ls data/daily
+输出应包含多个 CSV 文件，如 000001.SZ.csv, 000002.SZ.csv 等。
+打开一个文件（例如 data/daily/000001.SZ.csv），确认包含 ts_code, trade_date, open, high, low, close 等列。
+优化建议：
+如果股票数量多（A股约 5000 只），下载可能耗时长或超限。建议：
+限制下载数量（例如，修改脚本仅处理 stock_list['ts_code'][:10]）。
+添加延时（import time; time.sleep(1)）避免触发 API 频率限制。
+升级 TuShare 账户以提高积分。
+3. 数据更新机制
+目标：编写脚本定期更新数据，只下载增量部分（例如最近一周）。
+
+步骤：
+
+创建更新脚本：
+在 VS Code 中，右键 scripts 文件夹，创建新文件 update_daily_data.py。
+添加以下代码：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+# scripts/update_daily_data.py
+import tushare as ts
+import pandas as pd
+import os
+from datetime import datetime, timedelta
+from config import TUSHARE_TOKEN
+
+# 初始化 TuShare
+ts.set_token(TUSHARE_TOKEN)
+pro = ts.pro_api()
+
+# 计算最近一周的日期
+end_date = datetime.now().strftime('%Y%m%d')
+start_date = (datetime.now() - timedelta(days=7)).strftime('%Y%m%d')
+
+# 读取股票列表
+stock_list = pd.read_csv('data/stock_list.csv')
+
+# 更新日线数据
+for ts_code in stock_list['ts_code']:
+    file_path = f'data/daily/{ts_code}.csv'
+    if os.path.exists(file_path):
+        # 读取现有数据
+        df_old = pd.read_csv(file_path)
+        # 获取最新数据
+        print(f"更新 {ts_code} 的日线数据...")
+        df_new = pro.daily(ts_code=ts_code, start_date=start_date, end_date=end_date)
+        # 合并并去重
+        df_combined = pd.concat([df_old, df_new]).drop_duplicates(subset=['trade_date'], keep='last')
+        df_combined.to_csv(file_path, index=False)
+        print(f"{ts_code} 数据已更新至 {file_path}")
+    else:
+        # 如果文件不存在，下载全量数据
+        print(f"下载 {ts_code} 的全量日线数据...")
+        df = pro.daily(ts_code=ts_code, start_date='20200101', end_date=end_date)
+        df.to_csv(file_path, index=False)
+        print(f"{ts_code} 数据已保存至 {file_path}")
+说明：
+使用 datetime 计算最近一周的起止日期。
+如果数据文件存在，读取旧数据，下载增量数据，合并后去重（基于 trade_date）。
+如果文件不存在，下载全量数据。
+运行脚本：
+激活虚拟环境：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+source venv/Scripts/activate
+运行：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+python scripts/update_daily_data.py
+输出类似：
+text
+
+Collapse
+
+Wrap
+
+Copy
+更新 000001.SZ 的日线数据...
+000001.SZ 数据已更新至 data/daily/000001.SZ.csv
+...
+自动化更新（可选）：
+在 Windows 上，使用任务计划程序：
+打开“任务计划程序”（搜索“Task Scheduler”）。
+创建任务，设置每天运行，执行命令：
+cmd
+
+Collapse
+
+Wrap
+
+Copy
+C:\path\to\your_project\venv\Scripts\python.exe C:\path\to\your_project\scripts\update_daily_data.py
+或者，使用 Git Bash 的 cron 模拟（需额外配置）。
+验证结果：
+检查 data/daily/*.csv 文件，确认最近一周的数据已添加。
+4. 数据清洗
+目标：检查数据完整性，处理缺失值和异常值，格式化字段。
+
+步骤：
+
+创建清洗脚本：
+在 VS Code 中，右键 scripts 文件夹，创建新文件 clean_data.py。
+添加以下代码：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+# scripts/clean_data.py
+import pandas as pd
+import os
+
+# 遍历日线数据文件
+for file_name in os.listdir('data/daily'):
+    if file_name.endswith('.csv'):
+        file_path = f'data/daily/{file_name}'
+        print(f"清洗 {file_name}...")
+        df = pd.read_csv(file_path)
+
+        # 格式化日期
+        df['trade_date'] = pd.to_datetime(df['trade_date'], format='%Y%m%d')
+
+        # 检查缺失值
+        if df.isnull().any().any():
+            print(f"{file_name} 存在缺失值，尝试填充...")
+            df = df.fillna(method='ffill')  # 前向填充
+
+        # 检查异常值（例如，价格为负）
+        numeric_cols = ['open', 'high', 'low', 'close', 'pre_close', 'vol', 'amount']
+        for col in numeric_cols:
+            if (df[col] < 0).any():
+                print(f"{file_name} 的 {col} 列存在负值，替换为 NaN 并填充")
+                df[col] = df[col].mask(df[col] < 0, None)
+                df = df.fillna(method='ffill')
+
+        # 保存清洗后的数据
+        df.to_csv(file_path, index=False)
+        print(f"{file_name} 已清洗并保存")
+说明：
+格式化 trade_date 为 datetime 类型。
+检查并填充缺失值（使用前向填充）。
+检测负值（价格、成交量不应为负），替换为 NaN 并填充。
+运行脚本：
+激活虚拟环境：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+source venv/Scripts/activate
+运行：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+python scripts/clean_data.py
+输出类似：
+text
+
+Collapse
+
+Wrap
+
+Copy
+清洗 000001.SZ.csv...
+000001.SZ.csv 已清洗并保存
+...
+验证结果：
+打开 data/daily/000001.SZ.csv，确认 trade_date 为日期格式（如 2020-01-01），无缺失值或负值。
+更新 README.md
+在 VS Code 中打开 README.md，替换为以下内容，添加数据获取与清洗说明：
+
+markdown
+
+Collapse
+
+Wrap
+
+Copy
+# 股票数据分析项目
+
+## 项目概述
+使用 TuShare 获取A股数据，进行分析和可视化。
+
+## 目录结构
+- data/: 存储数据文件
+  - stock_list.csv: A股股票列表
+  - daily/*.csv: 每只股票的日线数据
+- scripts/: Python 脚本
+  - fetch_stock_list.py: 获取股票列表
+  - fetch_daily_data.py: 批量下载日线数据
+  - update_daily_data.py: 更新增量数据
+  - clean_data.py: 数据清洗
+- config.py: API 密钥配置
+- requirements.txt: 依赖列表
+
+## 环境配置
+1. 激活虚拟环境：`source venv/Scripts/activate`（Windows）
+2. 安装依赖：`pip install -r requirements.txt`
+3. 配置 `config.py` 中的 TuShare Token。
+
+## 运行
+1. 获取股票列表：`python scripts/fetch_stock_list.py`
+2. 批量下载日线数据：`python scripts/fetch_daily_data.py`
+3. 更新增量数据：`python scripts/update_daily_data.py`
+4. 清洗数据：`python scripts/clean_data.py`
+
+## 注意事项
+- TuShare API 有积分限制，批量下载时可能需要分批运行。
+- 定期运行 `update_daily_data.py` 以保持数据最新。
+常见问题与解决
+API 调用超限：
+TuShare 免费账户有限额，批量下载可能触发限制。解决方案：
+限制股票数量（修改 stock_list['ts_code'][:N]）。
+添加延时：
+python
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+import time
+time.sleep(1)  # 每次调用后等待 1 秒
+升级 TuShare 账户。
+文件写入失败：
+确保 data/daily 目录存在且有写入权限：
+bash
+
+Collapse
+
+Wrap
+
+Run
+
+Copy
+mkdir -p data/daily
+chmod -R u+w data
+数据清洗异常：
+如果数据格式不一致，检查 data/daily/*.csv 的列名是否与预期一致。
+调整清洗逻辑（如修改 numeric_cols 列表）。
+VS Code 运行报错：
+确保选择正确的 Python 解释器：
+按 Ctrl+Shift+P，输入 Python: Select Interpreter。
+选择 your_project/venv/Scripts/python.exe。

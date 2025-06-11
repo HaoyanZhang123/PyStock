@@ -1,0 +1,5 @@
+1.TuShare 的 API 有时对国际访问有限制
+
+2.不要把config.py的信息上传到git，用.gitignore添加保护一下
+
+3.每一步搭建都放在txt里了，有问题随时看

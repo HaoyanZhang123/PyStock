@@ -1,0 +1,81 @@
+✅ 一次性准备工作（只做一次）
+1. 注册 GitHub 账号
+如果还没注册：https://github.com/
+
+2. 本地配置 Git（只做一次）
+打开 Git Bash，执行：
+
+bash
+复制
+编辑
+git config --global user.name "你的GitHub用户名"
+git config --global user.email "你的注册邮箱"
+🚀 发布项目到 GitHub（详细步骤）
+步骤 1：初始化 Git 仓库（如果还没初始化）
+在项目根目录打开 Git Bash（你应该已经在使用 Git Bash）：
+
+bash
+复制
+编辑
+git init
+步骤 2：创建 .gitignore
+你已经有 .gitignore，确保包含以下内容（防止隐私泄露）：
+
+gitignore
+复制
+编辑
+venv/
+__pycache__/
+*.sqlite
+config.py
+步骤 3：将文件添加到 Git
+bash
+复制
+编辑
+git add .
+git commit -m "Initial commit: A股数据分析项目"
+步骤 4：在 GitHub 创建新仓库
+打开 https://github.com
+
+点击右上角 ➕ > New repository
+
+填写：
+
+Repository name：例如 a-share-data-analyzer
+
+Description：可选
+
+Visibility：Public 或 Private（看你是否想公开）
+
+不要勾选 “Initialize with README”（因为你已经有 README）
+
+点击 Create repository
+
+步骤 5：连接远程仓库并推送
+在 GitHub 创建成功后，会出现一段命令行提示，复制以下类似命令，在 Git Bash 执行：
+
+bash
+复制
+编辑
+git remote add origin https://github.com/你的用户名/a-share-data-analyzer.git
+git branch -M main
+git push -u origin main
+（如果你开的是私有仓库，会要求登录 GitHub，按提示输入账号密码或 Token）
+
+📌 验证
+打开浏览器访问：
+
+bash
+复制
+编辑
+https://github.com/你的用户名/a-share-data-analyzer
+你应该能看到整个项目文件结构，包括 README、scripts、data 等。
+
+✅ 后续更新方法（每次修改完代码后）
+bash
+复制
+编辑
+git add .
+git commit -m "说明本次更新做了什么"
+git push
+如果你愿意，我还可以帮你设计一个 .gitignore 更完整地排除临时文件，或者帮你加一个漂亮的 README 徽章（例如 Python 版本、License 等）。
