@@ -10,10 +10,10 @@
 ***In the endless pursuit of learning, I share this sentiment with all who happen to come across this project.***
 
 ## 注意事项
-由于github以及git LFS限制，实际上的stock_daily.sqlite并未被上传，但是可以根据README的内容自行爬取。<br>
-本项目最关键的模型回测和选股功能并未开发，由于技术力有限，本人打算结合手动测试，因此以后的版本也许也看不到这些功能，十分抱歉！<br>
-本项目为了隐私保护，未上传实际token，请自行注册tushare以使用。<br>
-项目中的config.py包含隐私信息，未上传，使用config_template.py代替，使用时将token替换成自己的即可。
+1.由于github以及git LFS限制，实际上的stock_daily.sqlite并未被上传，但是可以根据README的内容自行爬取。<br>
+2.本项目最关键的模型回测和选股功能并未开发，由于技术力有限，本人打算结合手动测试，因此以后的版本也许也看不到这些功能，十分抱歉！<br>
+3.本项目为了隐私保护，未上传实际token，请自行注册tushare以使用。<br>
+4.项目中的config.py包含隐私信息，未上传，使用config_template.py代替，使用时将token替换成自己的即可。
 
 ## 项目概述
 使用 TuShare 获取A股数据，进行分析和可视化。
