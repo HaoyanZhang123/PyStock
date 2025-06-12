@@ -73,8 +73,8 @@
 - 定期运行 `MU.py` 以保持数据最新。
 - 不要将 `config.py` 提交到 Git（已包含在 `.gitignore` 中）。
 - TuShare 的 API 有时对国际访问有限制，不要搭梯子会快很多。
-- 如果在“输出”中中文乱码，在该py中加入
+- 如果在“输出”中中文乱码，在该py中加入<br>
   import sys<br>
-  import io<br>
+  import io <br>
   sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')<br>
 - 如果日志乱码，右下角UTF-8，“通过编码重新打开”，“中文”
