@@ -6,7 +6,7 @@
 
 ***知识属于所有愿意学习的人,知识与技术永远应该用于造福人类***。<br>
 ***Knowledge belongs to all who are willing to learn, and knowledge and technology should always be used to benefit humanity.***<br>
-***在永无止境的学习中，与所有有缘看到此项目的人共勉。***
+***在永无止境的学习中，与所有有缘看到此项目的人共勉。*** <br>
 ***In the endless pursuit of learning, I share this sentiment with all who happen to come across this project.***
 
 ## 注意事项
@@ -74,7 +74,7 @@
 - 不要将 `config.py` 提交到 Git（已包含在 `.gitignore` 中）。
 - TuShare 的 API 有时对国际访问有限制，不要搭梯子会快很多。
 - 如果在“输出”中中文乱码，在该py中加入
-  import sys
-  import io
-  sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+  import sys<br>
+  import io<br>
+  sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')<br>
 - 如果日志乱码，右下角UTF-8，“通过编码重新打开”，“中文”
